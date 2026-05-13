@@ -6,24 +6,24 @@
 Kommunikationen kan delas upp i två zoner: Intern OT-trafik (inuti Docker-nätverket) och Externa administrationsflöden.
 
 ### OT-Kärnflöde (Modbus TCP):
-Källa: ScadaBR (10.0.50.20)<br />
-Destination: OpenPLC (10.0.50.10:502)<br />
-Beskrivning: ScadaBR frågar OpenPLC regelbundet efter registerstatus samt skickar kommandon (kan skriva värden).<br />
+<b>Källa:</b> ScadaBR (10.0.50.20)<br />
+<b>Destination:</b> OpenPLC (10.0.50.10:502)<br />
+<b>Beskrivning:</b> ScadaBR frågar OpenPLC regelbundet efter registerstatus samt skickar kommandon (kan skriva värden).<br />
 
 ### Externt HMI-flöde (HTTP):
-Källa: Webbläsare (localhost)<br />
-Destination: ScadaBR-containern (10.0.50.20:8080 via host-port 9090)<br />
-Beskrivning: Operatörsgränssnitt, visning av Watch Lists och larmhantering.<br />
+<b>Källa:</b> Webbläsare (localhost)<br />
+<b>Destination:</b> ScadaBR-containern (10.0.50.20:8080 via host-port 9090)<br />
+<b>Beskrivning:</b> Operatörsgränssnitt, visning av Watch Lists och larmhantering.<br />
 
 ### Externt PLC-adminflöde (HTTP):
-Källa: Webbläsare (localhost)<br />
-Destination: OpenPLC-containern (10.0.50.10:8080 via host-port 8080)<br />
-Beskrivning: Uppladdning av PLC-program (.st-filer) och hårdvarukonfiguration.<br />
+<b>Källa:</b> Webbläsare (localhost)<br />
+<b>Destination:</b> OpenPLC-containern (10.0.50.10:8080 via host-port 8080)<br />
+<b>Beskrivning:</b> Uppladdning av PLC-program (.st-filer) och hårdvarukonfiguration.<br />
 
 ### Internt Databasflöde (SQL):
-Källa: ScadaBR (10.0.50.20)<br />
-Destination: ScadaDB (10.0.50.15:3306)<br />
-Beskrivning: Lagring av historik, taggkonfiguration och användardata.<br />
+<b>Källa:</b> ScadaBR (10.0.50.20)<br />
+<b>Destination:</b> ScadaDB (10.0.50.15:3306)<br />
+<b>Beskrivning:</b> Lagring av historik, taggkonfiguration och användardata.<br />
 
 
 <kbd><img src="../screenshots/docker_host_network_architecture.jpg" alt="Nätverksarkitektur." width="650" /></kbd>
