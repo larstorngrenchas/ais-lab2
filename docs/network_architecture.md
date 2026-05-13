@@ -6,24 +6,24 @@
 Kommunikationen kan delas upp i två zoner: Intern OT-trafik (inuti Docker-nätverket) och Externa administrationsflöden.
 
 ### OT-Kärnflöde (Modbus TCP):
-Källa: ScadaBR (10.0.50.20)
-Destination: OpenPLC (10.0.50.10:502)
-Beskrivning: ScadaBR frågar OpenPLC regelbundet efter registerstatus samt skickar kommandon (kan skriva värden).
+Källa: ScadaBR (10.0.50.20)<br />
+Destination: OpenPLC (10.0.50.10:502)<br />
+Beskrivning: ScadaBR frågar OpenPLC regelbundet efter registerstatus samt skickar kommandon (kan skriva värden).<br />
 
 ### Externt HMI-flöde (HTTP):
-Källa: Webbläsare (localhost)
-Destination: ScadaBR-containern (10.0.50.20:8080 via host-port 9090)
-Beskrivning: Operatörsgränssnitt, visning av Watch Lists och larmhantering.
+Källa: Webbläsare (localhost)<br />
+Destination: ScadaBR-containern (10.0.50.20:8080 via host-port 9090)<br />
+Beskrivning: Operatörsgränssnitt, visning av Watch Lists och larmhantering.<br />
 
 ### Externt PLC-adminflöde (HTTP):
-Källa: Webbläsare (localhost)
-Destination: OpenPLC-containern (10.0.50.10:8080 via host-port 8080)
-Beskrivning: Uppladdning av PLC-program (.st-filer) och hårdvarukonfiguration.
+Källa: Webbläsare (localhost)<br />
+Destination: OpenPLC-containern (10.0.50.10:8080 via host-port 8080)<br />
+Beskrivning: Uppladdning av PLC-program (.st-filer) och hårdvarukonfiguration.<br />
 
 ### Internt Databasflöde (SQL):
-Källa: ScadaBR (10.0.50.20)
-Destination: ScadaDB (10.0.50.15:3306)
-Beskrivning: Lagring av historik, taggkonfiguration och användardata.
+Källa: ScadaBR (10.0.50.20)<br />
+Destination: ScadaDB (10.0.50.15:3306)<br />
+Beskrivning: Lagring av historik, taggkonfiguration och användardata.<br />
 
 
 <kbd><img src="../screenshots/docker_host_network_architecture.jpg" alt="Nätverksarkitektur." width="650" /></kbd>
@@ -35,17 +35,17 @@ Beskrivning: Lagring av historik, taggkonfiguration och användardata.
 Detta är ett klassiskt industriellt upplägg (ICS/OT) som är flyttat till Docker. Därigenom ärver systemet flera fundamentala sårbarheter. Om en angripare tar sig in på Docker-hosten eller på det lokala nätverket kan det innebära dessa hot:
 
 ### 1. Okrypterad och oautentiserad Modbus TCP (Port 502)
-<b>Risken:</b> Modbus TCP har ingen inbyggd kryptering eller autentisering.
-<b>Attackvektor:</b> Om en angripare kan köra en container i vårt ot-nät (exempelvis genom att kompromettera ScadaBR), kan de köra script för att skicka falska Modbus-kommandon direkt till OpenPLC. De kan tvångsstarta/stoppa motorer eller manipulera sensorvärden, vilket givetvis är ett mycket allvarligt hot (Man-in-the-Middle).
+<b>Risken:</b> Modbus TCP har ingen inbyggd kryptering eller autentisering.<br />
+<b>Attackvektor:</b> Om en angripare kan köra en container i vårt ot-nät (exempelvis genom att kompromettera ScadaBR), kan de köra script för att skicka falska Modbus-kommandon direkt till OpenPLC. De kan tvångsstarta/stoppa motorer eller manipulera sensorvärden, vilket givetvis är ett mycket allvarligt hot (Man-in-the-Middle).<br />
 
 ### 2. Klartext-administration via HTTP (Port 8080 & 9090)
-<b>Risken:</b> Både OpenPLC:s adminpanel och ScadaBR använder okrypterad HTTP istället för HTTPS.
-<b>Attackvektor:</b> Inloggningsuppgifter (användarnamn med standardlösenord) och sessions-cookies skickas helt i klartext över nätverket. En angripare som avlyssnar trafiken kan enkelt stjäla administratörssessionen och ladda upp ett skadligt PLC-program, vilket kan få förödande konsekvenser.
+<b>Risken:</b> Både OpenPLC:s adminpanel och ScadaBR använder okrypterad HTTP istället för HTTPS.<br />
+<b>Attackvektor:</b> Inloggningsuppgifter (användarnamn med standardlösenord) och sessions-cookies skickas helt i klartext över nätverket. En angripare som avlyssnar trafiken kan enkelt stjäla administratörssessionen och ladda upp ett skadligt PLC-program, vilket kan få förödande konsekvenser.<br />
 
 ### 3. Standardlösenord och hårdkodade uppgifter i Dockerfile
-<b>Risken:</b> Dockerfile och docker-compose använder standardlösenord (root/root) för MySQL-databasen.
-<b>Attackvektor:</b> Om databasporten av misstag exponeras externt, eller om en angripare tar sig in i ScadaBR-containern, är det trivialt att dumpa eller manipulera hela databasen, radera larmhistorik eller ändra användarbehörigheter.
+<b>Risken:</b> Dockerfile och docker-compose använder standardlösenord (root/root) för MySQL-databasen.<br />
+<b>Attackvektor:</b> Om databasporten av misstag exponeras externt, eller om en angripare tar sig in i ScadaBR-containern, är det trivialt att dumpa eller manipulera hela databasen, radera larmhistorik eller ändra användarbehörigheter.<br />
 
 ### 4. Legacy-miljö (Java 8 och Tomcat 8.5)
-<b>Risken:</b> ScadaBR kräver den gamla Java 8-miljön. Gamla versioner av Tomcat och Java har kända, publika sårbarheter (CVE:er).
-<b>Attackvektor:</b> En angripare kan scanna ScadaBR-webbservern och utnyttja kända brister i Tomcat för att uppnå Remote Code Execution (RCE), vilket ger dem full kontroll över containern utan att behöva gissa lösenord.
+<b>Risken:</b> ScadaBR kräver den gamla Java 8-miljön. Gamla versioner av Tomcat och Java har kända, publika sårbarheter (CVE:er).<br />
+<b>Attackvektor:</b> En angripare kan scanna ScadaBR-webbservern och utnyttja kända brister i Tomcat för att uppnå Remote Code Execution (RCE), vilket ger dem full kontroll över containern utan att behöva gissa lösenord.<br />
