@@ -26,18 +26,7 @@ Destination: ScadaDB (10.0.50.15:3306)
 Beskrivning: Lagring av historik, taggkonfiguration och användardata.
 
 
-
-[Docker Host Network/External Management]
-       │                      │
-       ├─► (Port 8080) ───────┼─► [OpenPLC Container]
-       │                      │       IP: 10.0.50.10
-       │                      │   ├── Port 8080 (Webb-admin, HTTP utan TLS)
-       │                      │   ├── Port 502  (Modbus TCP)
-       │                      │   └── Port 102  (Siemens S7/ISO-TSAP)
-       │                      │
-       └─► (Port 9090) ───────┼─► [ScadaBR Container]
-                                      IP: 10.0.50.20
-                                  └── Port 9090 (Webb-admin, HTTP utan TLS)
+<kbd><img src="../screenshots/docker_host_network_architecture.jpg" alt="Nätverksarkitektur." width="650" /></kbd>
 
 
 <kbd><img src="../screenshots/terminal_nmap_labb2-ics_ot-net_2.jpg" alt="Genom nmap kan man se vilka portar som är öppna för trafik." width="650" /></kbd>
