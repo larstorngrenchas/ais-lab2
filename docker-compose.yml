@@ -1,0 +1,57 @@
+services:
+  openplc:
+    image: openplc:v3
+    container_name: openplc-runtime
+    ports:
+      - "8080:8080"
+      - "502:502"
+    networks:
+      ot-net:
+        ipv4_address: 10.0.50.10
+    volumes:
+      - ./openplc_data:/workdir/st_files  # Saving the PLC programs (.st files)
+    restart: unless-stopped
+
+  # Separate database for the ScadaBR image
+  scadadb:
+    image: mysql:5.7
+    command: --lower_case_table_names=1  # Important for ScadaBR on Linux
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=scadabr
+    networks:
+      ot-net:
+        ipv4_address: 10.0.50.15
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./mysql_data:/var/lib/mysql       # Saving the complete database (tags, history)
+    restart: unless-stopped
+
+  scadabr:
+    build: . # Building the Docker image in the same folder
+    image: lasse-scadabr:latest
+    container_name: scadabr-hmi
+    ports:
+      - "9090:8080"
+    depends_on:
+    #  - scadadb
+      scadadb:
+        condition: service_healthy  # Waiting for the health check  
+    networks:
+      ot-net:
+        ipv4_address: 10.0.50.20
+    volumes:
+      - ./scadabr_files:/usr/local/tomcat/webapps/ScadaBR/WEB-INF/out  # Saving uploaded files/iamges
+    restart: unless-stopped
+
+networks:
+  ot-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.50.0/24
+          gateway: 10.0.50.1
